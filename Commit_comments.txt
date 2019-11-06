@@ -1,0 +1,4 @@
+Commit #1:
+1) Created Tour model with set of Business validations in Model/Tour.js file.
+2) Created CRUD operation in routes/tourRoutes.js
+3) Created app.js which is the file that will be hosted.
