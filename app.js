@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const morgan = require('morgan');
 require('dotenv').config();
 
 
@@ -22,7 +23,9 @@ app.listen(process.env.PORT, () =>
     console.log(`App running on ${process.env.PORT}`)
 );
 
-
+if(process.env.NODE_ENV == 'development'){
+    app.use(morgan('dev'));
+}
 //Middlewares
 app.use(express.json());
 

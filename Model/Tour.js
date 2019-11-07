@@ -68,7 +68,8 @@ const TourSchema = mongoose.Schema({
     images: [String],
     createdAt : {
         type : Date,
-        default : Date.now()
+        default : Date.now(),
+        select : false //createdAt property will never be sent to user in request
     },
     startDates: [Date],
     // slug: String

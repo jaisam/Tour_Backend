@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "dev": "nodemon app.js",
-    "prod": "NODE_ENV=production node app.js"
+    "prod": "NODE_ENV=production node app.js",
+    "debug": "debug app.js"
   },
   "author": "Jai Samtani",
   "license": "ISC",
@@ -14,5 +15,8 @@
     "express": "^4.17.1",
     "mongoose": "^5.7.8",
     "nodemon": "^1.19.4"
+  },
+  "devDependencies": {
+    "morgan": "^1.9.1"
   }
 }

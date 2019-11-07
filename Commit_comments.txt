@@ -2,3 +2,21 @@ Commit #1:
 1) Created Tour model with set of Business validations in Model/Tour.js file.
 2) Created CRUD operation in routes/tourRoutes.js
 3) Created app.js which is the file that will be hosted.
+
+Commit #2 :
+1) Created FILTERING feature in get API.
+Frontend should send req.query in this format to filter data on duration and ratingsAverage : 
+    '?duration=1&ratingsAverage[lte]=4.5'
+2) Created SORTING feature in get API.
+Frontend should send req.query in this format for ASCENDING ORDER :
+   'sort=duration,ratingsAverage'
+Frontend should send req.query in this format for DESCENDING ORDER :
+   'sort=-duration,-ratingsAverage'
+3) Created LIMITING FIELDS feature in get API
+Frontend should send req.query in this format to include only these 3 properties in response :
+   '?fields=name,duration,difficulty'
+Frontend should send req.query in this format to exclude only these 3 properties in response :
+   'sort=-name,-duration,-difficulty'
+4) Created PAGINATION feature in get API.
+Frontend should send req.query in this format to get data of Page 2 which has 3 values only :
+   '?page=2&limit=3'

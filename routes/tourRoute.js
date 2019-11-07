@@ -1,11 +1,23 @@
 const express = require('express');
 const Tour = require('../Model/Tour');
+const APIFeatures = require('../utils/apiFeatures');
 
 const router = express.Router();
 
 router.get('/', async (req, res, next) => {
     try {
-        const tours = await Tour.find();
+        // // BUILD QUERY
+        let features = new APIFeatures(Tour.find(), req.query)
+            .filter()
+            .sort()
+            .limitFields()
+            .paginate();
+        // console.log('features => ' , features.query); 
+        
+        // EXECUTE QUERY   
+        const tours = await features.query;
+        // console.log('tours', tours);
+
         if (tours.length < 1) {
             res.status(404).json({
                 status: "fail",
