@@ -13,7 +13,7 @@ router.get('/', async (req, res, next) => {
             .limitFields()
             .paginate();
         // console.log('features => ' , features.query); 
-        
+
         // EXECUTE QUERY   
         const tours = await features.query;
         // console.log('tours', tours);
@@ -35,10 +35,16 @@ router.get('/', async (req, res, next) => {
         }
     } catch (error) {
         console.log(error);
-        res.status(500).send({
-            status: 'fail',
-            message: error
-        });
+        // res.status(500).send({
+        //     status: 'fail',
+        //     message: error
+        // });
+        let err = new Error(error.message);
+        err = error;
+        err.status = 'fail';
+        err.statusCode = '500';
+        err.errorAt = 'GetAllTours';
+        next(err);
     }
 });
 
@@ -62,10 +68,16 @@ router.get('/:tourId', async (req, res, next) => {
         }
     } catch (error) {
         console.log(error);
-        res.status(500).send({
-            status: 'fail',
-            message: error
-        });
+        // res.status(500).send({
+        //     status: 'fail',
+        //     message: error
+        // });
+        let err = new Error(error.message);
+        err = error;
+        err.status = 'fail';
+        err.statusCode = '500';
+        err.errorAt = 'GetTourById';
+        next(err);
     }
 });
 
@@ -85,10 +97,16 @@ router.post('/', async (req, res, next) => {
         });
     } catch (error) {
         console.log(error);
-        res.status(400).send({
-            status: 'fail',
-            message: error
-        });
+        // res.status(400).send({
+        //     status: 'fail',
+        //     message: error
+        // });
+        let err = new Error(error.message);
+        err = error;
+        err.status = 'fail';
+        err.statusCode = '400';
+        err.errorAt = 'Post';
+        next(err);
     }
 });
 
@@ -115,10 +133,16 @@ router.patch('/:tourId', async (req, res, next) => {
         }
     } catch (error) {
         console.log(error);
-        res.status(500).send({
-            status: 'fail',
-            message: error
-        });
+        // res.status(500).send({
+        //     status: 'fail',
+        //     message: error
+        // });
+        let err = new Error(error.message);
+        err = error;
+        err.status = 'fail';
+        err.statusCode = '500';
+        err.errorAt = 'Patch';
+        next(err);
     }
 });
 
@@ -126,17 +150,31 @@ router.patch('/:tourId', async (req, res, next) => {
 
 router.delete('/:tourId', async (req, res, next) => {
     try {
-        await Tour.findByIdAndDelete(req.params.tourId);
-        res.json({
-            status: "success",
-            data: null
-        });
+        const tour = await Tour.findByIdAndDelete(req.params.tourId);
+        if (!tour) {
+            res.status(404).json({
+                status: "fail",
+                message: "No tour found"
+            });
+        } else {
+            res.json({
+                status: "success",
+                data: null
+            });
+        }
     } catch (error) {
         console.log(error);
-        res.status(500).send({
-            status: 'fail',
-            message: error
-        });
+        // res.status(500).send({
+        //     status: 'fail',
+        //     message: error
+        // });
+        let err = new Error(error.message);
+        err = error;
+        err.status = 'fail';
+        err.statusCode = '500';
+        err.errorAt = 'Delete';
+        
+        next(err);
     }
 });
 
