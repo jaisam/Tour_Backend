@@ -3,6 +3,7 @@ Commit #1:
 2) Created CRUD operation in routes/tourRoutes.js
 3) Created app.js which is the file that will be hosted.
 
+
 Commit #2 :
 1) Created FILTERING feature in get API.
 Frontend should send req.query in this format to filter data on duration and ratingsAverage : 
@@ -21,6 +22,14 @@ Frontend should send req.query in this format to exclude only these 3 properties
 Frontend should send req.query in this format to get data of Page 2 which has 3 values only :
    '?page=2&limit=3'
 
+
 Commit #3:
 1) Created new route which will be called if none of the routes are matched.
 2) Created Global Error Handling middleware.
+
+
+Commit #4 :
+1) Created User model.
+2) Created Error Class.
+3) Created userController.js , tourController.js . 
+Moved code from userRoute.js to userController.js and tourRoute.js to tourController.js

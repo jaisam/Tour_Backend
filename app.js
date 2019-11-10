@@ -4,59 +4,49 @@ const morgan = require('morgan');
 require('dotenv').config();
 
 
+// Importing Middleware
+const AppError = require('./utils/appError');
+const globalErrorHandler = require('./Controllers/errorController');
+const tourRoute = require('./routes/tourRoute');
+const userRoute = require('./routes/userRoute');
+
+
+// Init App
 const app = express();
 
+
+// Database Connection
+// console.log(process.env.DATABASE_LOCAL);
 mongoose.connect(process.env.DATABASE_LOCAL,
     {
         useNewUrlParser: true,
-        useUnifiedTopology: true
+        useUnifiedTopology: true,
+        useCreateIndex: true
     },
-    () => console.log('Connected to database!')
+    (err) => {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log('Connected to database!');
+            app.listen(process.env.PORT, () =>
+                console.log(`App running on ${process.env.PORT}`)
+            );
+        }
+    }
 );
 
-const db = mongoose.connection;
-db.on('error', (error) => console.error.bind(console, 'connection error:'));
-db.once('open', () => console.log('connnection succesful'));
 
 
-app.listen(process.env.PORT, () =>
-    console.log(`App running on ${process.env.PORT}`)
-);
-
-if (process.env.NODE_ENV == 'development') {
-    app.use(morgan('dev'));
-}
-//Middlewares
+// Middlewares
+let morganMode = process.env.NODE_ENV == 'development' ? 'dev' : 'combined';
+app.use(morgan(morganMode));
 app.use(express.json());
 
-// Importing Middleware
-const tourRoute = require('./routes/tourRoute');
 
+// Routes
 app.use('/tours', tourRoute);
-
+app.use('/user', userRoute);
 app.all('*', (req, res, next) => {
-    const error = new Error(`Requested ${req.originalUrl} route not found!`);
-    error.status = 'fail';
-    error.statusCode = 404;
-    next(error);
+    next(new AppError(`Requested ${req.originalUrl} route not found!`, 404));
 });
-
-app.use((error, req, res, next) => {
-    console.log(`Error occured in ${error.errorAt} API function`);
-    error.statusCode = error.statusCode || 500;
-    error.status = error.status || 'error';
-    error.message = error.message || 'Internal Server Error';
-
-    if (process.env.NODE_ENV === 'development') {
-        res.status(error.statusCode).json({
-            status: error.status,
-            message: error.message,
-            errorStack: error.stack
-        });
-    } else if (process.env.NODE_ENV === 'production') {
-        res.status(error.statusCode).json({
-            status: error.status,
-            message: error.message
-        });
-    }
-})
+app.use(globalErrorHandler);
