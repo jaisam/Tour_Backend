@@ -33,3 +33,8 @@ Commit #4 :
 2) Created Error Class.
 3) Created userController.js , tourController.js . 
 Moved code from userRoute.js to userController.js and tourRoute.js to tourController.js
+
+Commit #5:
+1) Added few properties in tourModel.js
+2) Created reviewModel.js
+3) Created a handleFactory.js to generalize the post,patch,delete functions

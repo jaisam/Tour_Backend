@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const slugify = require('slugify');
 
 const TourSchema = mongoose.Schema({
     name: {
@@ -10,6 +11,7 @@ const TourSchema = mongoose.Schema({
         maxlength: [100, 'A tour can have name between 1-100 characters'],
         minlength: [1, 'A tour can have name between 1-100 characters']
     },
+    slug: String,
     duration: {
         type: Number,
         required: [true, 'A tour must have duration']
@@ -32,7 +34,8 @@ const TourSchema = mongoose.Schema({
         default: 4.5,
         // Checks value is in range of min and max.
         min: [1, 'A tour can have rating Average between 1 and 5'],
-        max: [5, 'A tour can have rating Average between 1 and 5']
+        max: [5, 'A tour can have rating Average between 1 and 5'],
+        set: val => Math.round(val * 10) / 10 // 4.66666666 -> 46.666666 -> 47 -> 4.7
     },
     ratingsQuantity: {
         type: Number,
@@ -45,7 +48,7 @@ const TourSchema = mongoose.Schema({
     priceDiscount: {
         type: Number,
         // Custom validator. This function does not works on update function()
-        validate: {  
+        validate: {
             validator: function (val) {
                 return val < this.price;
             },
@@ -66,13 +69,96 @@ const TourSchema = mongoose.Schema({
         required: [true, 'A tour must have Cover Image']
     },
     images: [String],
-    createdAt : {
-        type : Date,
-        default : Date.now(),
-        select : false //createdAt property will never be sent to user in request
+    createdAt: {
+        type: Date,
+        default: Date.now(),
+        select: false //createdAt property will never be sent to user in request
     },
     startDates: [Date],
-    // slug: String
+    startLocation: {
+        // Nested Object
+        type: {
+            type: String,
+            default: 'Point',
+            enum: ['Point']
+        },
+        coordinates: {
+            type: [Number]
+        },
+        adddress: String,
+        description: String,
+    },
+    locations: [
+        {
+            type: {
+                type: String,
+                default: 'Point',
+                enum: ['Point']
+            },
+            coordinates: {
+                type: [Number]
+            },
+            address: String,
+            Description: String,
+            day: Number
+        }
+    ],
+    guides: [
+        {
+            type: mongoose.Schema.ObjectId,
+            ref: 'User'
+        }
+    ]
+},  // For virtuals
+    {
+        toJSON: { virtuals: true },
+        toObject: { virtuals: true }
+    }
+);
+
+
+// Indexes :
+TourSchema.index({ price: 1, ratingsAverage: -1 });
+
+// Virtuals : 
+TourSchema.virtual('durationWeeks').get(function () {
+    return this.duration / 7;
 });
+
+
+// Virtual populate :
+// Review ids are not stored in tours, as reviews canbe many so tour document will have these many ids.
+// We will use virtual populate instead to pouplate reviews.
+TourSchema.virtual('reviews', {
+    ref: 'Review',
+    // Defining primary key/ foreign key relationship
+    localField: '_id',
+    foreignField: 'tour'
+});
+
+
+// DOCUMENT MIDDLEWARE: runs before .save() and .create()
+TourSchema.pre('save', function (next) {
+    this.slug = slugify(this.name, { lower: true });
+    next();
+});
+
+
+// QUERY MIDDLEWARE : this points to current query object returned by Find,update,delete.
+// Once find objects returns query, it will run and populate 'guides,'reviews' and then save document in db.
+TourSchema.pre(/^find/, function (next) {
+    this.populate(
+        {
+            path: 'guides',
+            select: '-__v -passwordChangedAt'
+        }
+    ).populate(
+        {
+            path: 'reviews'
+        }
+    );
+    next();
+});
+
 
 module.exports = mongoose.model('Tour', TourSchema);

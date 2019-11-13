@@ -2,7 +2,7 @@ const AppError = require('../utils/appError');
 
 
 const sendDevError = (error, req, res, next) => {
-    console.log('Inside sendDevError' , error);
+    // console.log('Inside sendDevError' , error);
     res.status(error.statusCode).json({
         status: error.status,
         message: error.message,
@@ -13,7 +13,7 @@ const sendDevError = (error, req, res, next) => {
 
 const sendProdError = (err, req, res, next) => {
   // Operational, trusted error: send message to client
-  console.log('Inside sendProdError' , err);
+  // console.log('Inside sendProdError' , err);
   if (err.isOperational) {
     res.status(err.statusCode).json({
       status: err.status,
@@ -67,7 +67,7 @@ const handleJWTExpiredError = () => {
 
 module.exports = (error, req, res, next) => {
 
-    console.log('Inside Global Error Handler' , error);
+    // console.log('Inside Global Error Handler' , error);
 
     error.statusCode = error.statusCode || 500;
     error.status = error.status || 'error';
@@ -77,7 +77,7 @@ module.exports = (error, req, res, next) => {
 
     } else if (process.env.NODE_ENV === 'production') {
         let err = { ...error };
-        console.log('Inside Global Error Handler, else part' , err);
+        // console.log('Inside Global Error Handler, else part' , err);
         if (err.name === 'CastError') err = handleCastErrorDB(err);
         if (err.code === 11000) err = handleDuplicateFieldsDB(err);
         if (err.name === 'ValidationError') err = handleValidationErrorDB(err);

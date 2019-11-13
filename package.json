@@ -4,9 +4,9 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "dev": "nodemon app.js",
+    "dev": "nodemon app.js",  
     "prod": "NODE_ENV=production node app.js",
-    "debug": "debug app.js"
+    "debug": "ndb app.js"
   },
   "author": "Jai Samtani",
   "license": "ISC",
@@ -14,10 +14,17 @@
     "bcrypt": "^3.0.6",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "express-mongo-sanitize": "^1.3.2",
+    "express-rate-limit": "^5.0.0",
+    "helmet": "^3.21.2",
+    "hpp": "^0.2.2",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.7.8",
+    "nodemailer": "^6.3.1",
     "nodemon": "^1.19.4",
-    "validator": "^12.0.0"
+    "slugify": "^1.3.6",
+    "validator": "^12.0.0",
+    "xss-clean": "^0.1.1"
   },
   "devDependencies": {
     "morgan": "^1.9.1"
