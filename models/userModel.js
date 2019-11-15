@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose') // .set('debug', true);
 const crypto = require('crypto');
 const Validator = require('validator');
 const bcrypt = require('bcrypt');

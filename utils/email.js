@@ -2,12 +2,22 @@ const nodemailer = require('nodemailer');
 
 const sendEmail = async options => {
     // 1) Create a transporter
-    const transporter = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST,
-        port: process.env.EMAIL_PORT,
+    let transporter;
+    if(process.env.NODE_ENV === 'production') {
+        transporter = nodemailer.createTransport({
+            service : 'SendGrid',
+            auth: {
+                user: process.env.SEND_GRID_SMTP_USERNAME,
+                pass: process.env.SEND_GRID_SMTP_PASSWORD
+            }
+        });
+    }
+     transporter = nodemailer.createTransport({
+        host: process.env.MAIL_TRAP_EMAIL_HOST,
+        port: process.env.MAIL_TRAP_EMAIL_PORT,
         auth: {
-            user: process.env.EMAIL_USERNAME,
-            pass: process.env.EMAIL_PASSOWRD
+            user: process.env.MAIL_TRAP_EMAIL_USERNAME,
+            pass: process.env.MAIL_TRAP_EMAIL_PASSWORD
         }
     });
 
@@ -19,9 +29,9 @@ const sendEmail = async options => {
         text: options.message
         //html :
     };
-
+    console.log("sending email");
     // 3) Actually send the email
-     await transporter.sendMail(mailOptions);
+    await transporter.sendMail(mailOptions);
 }
 
 module.exports = sendEmail;

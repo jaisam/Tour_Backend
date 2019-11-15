@@ -38,3 +38,24 @@ Commit #5:
 1) Added few properties in tourModel.js
 2) Created reviewModel.js
 3) Created a handleFactory.js to generalize the post,patch,delete functions
+
+Error Problem conclusion:-
+Problem:- appserver not returning message property in response in production env 
+         eg- In casterror, response was only status.
+            Actual :- {"status":"fail"}
+            Expected:- {"status":"fail","message":"Invalid _id : 5dcd5ba25b883711802e45"}
+
+mistake 1:- In catchAsync utility, in catch block, i was passing "AppError" class obj instead of original "Error" class obj thrown by mongoose.
+         hence the property like "name" of original "Error" class obj was not retained. Therefore the if block was not executing and app server was returning response without message prop.
+
+mistake 2:- For errors like "No Document Found", I was creating "AppError" class object by passing message,statusCode ("No Document Found" , 404).
+            In AppError im using super(message), this is adding message to Error object and appending properties like statusCode,status,isOperational.
+            In errorController.js , I was using spread operator. This spread operator was not copying the message property.
+            Hence, I removed spread operator.
+
+
+Commit #6 :
+1) Modified errorController.js and catchAsync.js as mentioned in above mistakes.
+2) Modified reviewController.js . Checking If tour exists first, then only adding/updating/deleting review.
+3) forgotPassword API is working now and is sending mails. resetPassword API is working now. 
+Modified date comparision in findOne of resetPassword API. 

@@ -23,6 +23,7 @@ const app = express();
 
 // Database Connection
 let DB_URL = process.env.NODE_ENV === 'development' ? process.env.DATABASE_LOCAL : process.env.DB_URL;
+console.log(DB_URL);
 mongoose.connect( DB_URL,
     {
         useNewUrlParser: true,

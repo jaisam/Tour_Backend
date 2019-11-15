@@ -2,49 +2,35 @@ const Tour = require('../models/tourModel');
 const APIFeatures = require('../utils/apiFeatures');
 const AppError = require('../utils/appError');
 const Factory = require('./handlerFactory');
+const catchAsync = require('../utils/catchAsync');
 
+exports.getAllTour = catchAsync(async (req, res, next) => {
+    // // BUILD QUERY
+    let features = new APIFeatures(Tour.find(), req.query)
+        .filter()
+        .sort()
+        .limitFields()
+        .paginate();
+    // console.log('features => ', features.query);
 
-exports.getAllTour = async (req, res, next) => {
-    try {
-        // // BUILD QUERY
-        let features = new APIFeatures(Tour.find(), req.query)
-            .filter()
-            .sort()
-            .limitFields()
-            .paginate();
-        // console.log('features => ', features.query);
+    // EXECUTE QUERY   
+    const tours = await features.query;
+    // console.log('tours', tours);
 
-        // EXECUTE QUERY   
-        const tours = await features.query;
-        // console.log('tours', tours);
-
-        if (tours.length < 1) {
-            /* Using my own AppError class which extends inbuilt Error Class */
-            next(new AppError('No tours found', 404));
-        }
-        else {
-            res.json({
-                status: "success",
-                results: tours.length,
-                data: {
-                    tours
-                }
-            });
-        }
-    } catch (error) {
-        console.log(error);
-        /* Using inbuilt Error class.
-        let err = new Error(error.message);
-        err = error;
-        err.status = 'fail';
-        err.statusCode = '500';
-        err.errorAt = 'GetAllTours';
-        next(err);
-        */
+    if (tours.length < 1) {
         /* Using my own AppError class which extends inbuilt Error Class */
-        next(new AppError(error.message, 500));
+        next(new AppError('No tours found', 404));
     }
-}
+    else {
+        res.json({
+            status: "success",
+            results: tours.length,
+            data: {
+                tours
+            }
+        });
+    }
+});
 
 exports.getTour = Factory.getOne(Tour);
 // exports.getTour = async (req, res, next) => {

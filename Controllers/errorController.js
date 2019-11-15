@@ -1,5 +1,5 @@
 const AppError = require('../utils/appError');
-
+const _=require('lodash');
 
 const sendDevError = (error, req, res, next) => {
     // console.log('Inside sendDevError' , error);
@@ -15,6 +15,7 @@ const sendProdError = (err, req, res, next) => {
   // Operational, trusted error: send message to client
   // console.log('Inside sendProdError' , err);
   if (err.isOperational) {
+    console.log("opp error");
     res.status(err.statusCode).json({
       status: err.status,
       message: err.message
@@ -76,15 +77,14 @@ module.exports = (error, req, res, next) => {
         sendDevError(error, req, res, next);
 
     } else if (process.env.NODE_ENV === 'production') {
-        let err = { ...error };
-        // console.log('Inside Global Error Handler, else part' , err);
-        if (err.name === 'CastError') err = handleCastErrorDB(err);
-        if (err.code === 11000) err = handleDuplicateFieldsDB(err);
-        if (err.name === 'ValidationError') err = handleValidationErrorDB(err);
-        if (err.name === 'JsonWebTokenError') err = handleJWTError();
-        if (err.name === 'TokenExpiredError') err = handleJWTExpiredError();
         
-        console.log('Inside Global Error Handler, inside Production else' , err);
-        sendProdError(err, req, res, next);
+        if (error.name === 'CastError') error = handleCastErrorDB(error);
+        if (error.code === 11000) error = handleDuplicateFieldsDB(error);
+        if (error.name === 'ValidationError') error = handleValidationErrorDB(error);
+        if (error.name === 'JsonWebTokenError') error = handleJWTError();
+        if (error.name === 'TokenExpiredError') error = handleJWTExpiredError();
+        
+        // console.log('Inside Global Error Handler, inside Production else' , err);
+        sendProdError(error, req, res, next);
     }
 }

@@ -75,6 +75,10 @@ const TourSchema = mongoose.Schema({
         select: false //createdAt property will never be sent to user in request
     },
     startDates: [Date],
+    isDeleted:{
+        type:Boolean,
+        default:false
+    },
     startLocation: {
         // Nested Object
         type: {

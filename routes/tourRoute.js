@@ -11,6 +11,12 @@ router.get('/', tourController.getAllTour);
 router.get('/:id', tourController.getTour);
 
 
+// Review will be added to particular tour, so we will need ID of tour. Hence we came to tourRouter first.
+// Now we got tourId , we will go to reviewRouter and use its API's.
+// Make sure to add mergeParams : true in reviewRouter  
+router.use('/:tourId/reviews', reviewRouter);
+
+
 // Below routes are Authenticated Routes and Authorised Routes.
 //Hence calling authController.protect middleware before routes
 router.use(authController.protect, authController.restrictTo('admin', 'lead-guide'));
@@ -26,9 +32,5 @@ router.delete('/:id',
     // authController.protect,
     tourController.deleteTour);
 
-// Review will be added to particular tour, so we will need ID of tour. Hence we came to tourRouter first.
-// Now we got tourId , we will go to reviewRouter and use its API's.
-// Make sure to add mergeParams : true in reviewRouter  
-router.use('/:tourId/reviews', reviewRouter);
 
 module.exports = router;
