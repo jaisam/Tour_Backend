@@ -23,8 +23,8 @@ const app = express();
 
 // Database Connection
 let DB_URL = process.env.NODE_ENV === 'development' ? process.env.DATABASE_LOCAL : process.env.DB_URL;
-console.log(DB_URL);
-mongoose.connect( DB_URL,
+console.log(process.env.NODE_ENV, DB_URL);
+mongoose.connect(DB_URL,
     {
         useNewUrlParser: true,
         useUnifiedTopology: true,
@@ -51,9 +51,9 @@ app.use(helmet());
 
 // Only 500 requests can be send from particular IP in frame of 1 hr
 const limiter = rateLimit({
-    max : 500,
-    windowMs : 60 * 60 * 1000,
-    message : 'Too many requests from this IP, please try again after 1 hour!'
+    max: 500,
+    windowMs: 60 * 60 * 1000,
+    message: 'Too many requests from this IP, please try again after 1 hour!'
 });
 app.use('/api', limiter);
 
@@ -62,7 +62,7 @@ let morganMode = process.env.NODE_ENV == 'development' ? 'dev' : 'combined';
 app.use(morgan(morganMode));
 
 // Body Praser, reading data from body into req.body. 
-app.use(express.json({ limit : '10kb' }));
+app.use(express.json({ limit: '10kb' }));
 
 // Data Sanitization against NoSQL query injection. If NoSQL query is present in req.body,req.params, it throws error
 app.use(mongoSanitize());
@@ -72,7 +72,7 @@ app.use(xss());
 
 // Prevent Parameter Pollution
 app.use(hpp({
-    whitelist : [
+    whitelist: [
         'duration',
         'maxGroupSize',
         'difficulty',
@@ -86,7 +86,7 @@ app.use(hpp({
 // Route-handler
 app.use('/api/tours', tourRoute);
 app.use('/api/user', userRoute);
-app.use('/api/reviews' , reviewRoute);
+app.use('/api/reviews', reviewRoute);
 app.all('*', (req, res, next) => {
     next(new AppError(`Requested ${req.originalUrl} route not found!`, 404));
 });

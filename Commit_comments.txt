@@ -59,3 +59,7 @@ Commit #6 :
 2) Modified reviewController.js . Checking If tour exists first, then only adding/updating/deleting review.
 3) forgotPassword API is working now and is sending mails. resetPassword API is working now. 
 Modified date comparision in findOne of resetPassword API. 
+
+
+Commit #7 : 
+1) Used SendGrid to send mail in production environment.

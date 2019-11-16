@@ -4,7 +4,7 @@ const AppError = require('../utils/appError');
 const sendEmail = require('../utils/email');
 const crypto = require('crypto');
 const catchAsync = require('../utils/catchAsync');
-
+const Email = require('../utils/email');
 
 const signToken = id => {
     return jwt.sign(
@@ -51,6 +51,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     });
     const savedData = await newUser.save();
     createSendToken(newUser, 201, res);
+    const mail = new Email(newUser).welcomeMail();
 });
 
 
@@ -125,21 +126,15 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     // 2) Generate random Reset Token
     const resetToken = user.createPasswordResetToken();
     const savedUser = await user.save({ validateBeforeSave: false }); //THis is done because in schema we have required fields but we are not saving whole data
-    console.log('savedUserUser' , savedUser);
+    console.log('savedUserUser', savedUser);
 
     // 3) Send it to user via email
     const resetURL = `${req.protocol}://${req.get('host')}/api/user/resetPassword/${resetToken}`;
 
-    const message = `Forgot your password? Submit a PATCH request with your new Pasword and PasswordConfirm to 
-            ${resetURL} \n If you didn't forgot your password, please ignore this email! `;
+    const email = new Email(user, resetURL);
 
     try {
-        await sendEmail({
-            email: user.email,
-            subject: 'Your password reset token (Valid for 10 mins)',
-            message
-        });
-
+        const email = new Email(user, resetURL).forgotPasswordMail();
         res.status(200).json({
             status: 'success',
             message: 'Token sent to email'
@@ -160,14 +155,14 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     console.log('Inside resetPassword');
     const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
     console.log('hashedToken : ', hashedToken);
-    console.log('Current Date' , new Date().toISOString());
+    console.log('Current Date', new Date().toISOString());
     // console.log('Password Reset Expires Date :' , user.passwordResetExpires );
 
     // 2) If token has expired, and there is user, ask him to use forgot password again
     const user = await User.findOne(
         {
             passwordResetToken: hashedToken
-            ,passwordResetExpires: {
+            , passwordResetExpires: {
                 $gt: new Date().toISOString()
             }
         });
@@ -181,12 +176,14 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     user.passwordResetExpires = undefined;
 
     const newUser = await user.save();
-    console.log('New User :' , newUser);
+    console.log('New User :', newUser);
 
     // 3) Update chnagedPasswordAt property for user
     // This is done in userModel
 
-    // 4) Log the user in, send the JWT again
+    // 4) Send password reset mail
+    const email = new Email(newUser).resetPasswordMail();
+    // 5) Log the user in, send the JWT again
     createSendToken(user, 201, res);
 });
 
