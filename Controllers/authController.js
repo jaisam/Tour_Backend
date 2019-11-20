@@ -1,10 +1,10 @@
 const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
 const AppError = require('../utils/appError');
-const sendEmail = require('../utils/email');
 const crypto = require('crypto');
 const catchAsync = require('../utils/catchAsync');
 const Email = require('../utils/email');
+
 
 const signToken = id => {
     return jwt.sign(
@@ -50,8 +50,9 @@ exports.signup = catchAsync(async (req, res, next) => {
         passwordConfirm: req.body.passwordConfirm
     });
     const savedData = await newUser.save();
+    const url = `${req.protocol}://${req.get('Host')}/user/me`;
+    await new Email(newUser, url).welcomeMail();
     createSendToken(newUser, 201, res);
-    const mail = new Email(newUser).welcomeMail();
 });
 
 
@@ -129,12 +130,10 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     console.log('savedUserUser', savedUser);
 
     // 3) Send it to user via email
-    const resetURL = `${req.protocol}://${req.get('host')}/api/user/resetPassword/${resetToken}`;
-
-    const email = new Email(user, resetURL);
 
     try {
-        const email = new Email(user, resetURL).forgotPasswordMail();
+        const resetURL = `${req.protocol}://${req.get('host')}/api/user/resetPassword/${resetToken}`;
+        await new Email(user, resetURL).forgotPasswordMail();
         res.status(200).json({
             status: 'success',
             message: 'Token sent to email'
@@ -152,11 +151,9 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 
 exports.resetPassword = catchAsync(async (req, res, next) => {
     // 1) Get User based on token
-    console.log('Inside resetPassword');
     const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
-    console.log('hashedToken : ', hashedToken);
-    console.log('Current Date', new Date().toISOString());
-    // console.log('Password Reset Expires Date :' , user.passwordResetExpires );
+    // console.log('hashedToken : ', hashedToken);
+    // console.log('Current Date', new Date().toISOString());
 
     // 2) If token has expired, and there is user, ask him to use forgot password again
     const user = await User.findOne(
@@ -169,20 +166,20 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     if (!user) {
         return next(new AppError('Token is invalid or has expired', 400));
     }
-    console.log('Before setting passord and saving it');
     user.password = req.body.password;
     user.passwordConfirm = req.body.passwordConfirm;
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
 
     const newUser = await user.save();
-    console.log('New User :', newUser);
+    // console.log('New User :', newUser);
 
-    // 3) Update chnagedPasswordAt property for user
+    // 3) Update changedPasswordAt property for user
     // This is done in userModel
 
-    // 4) Send password reset mail
-    const email = new Email(newUser).resetPasswordMail();
+    // // 4) Send password reset mail
+    // const email = new Email(newUser).resetPasswordMail();
+
     // 5) Log the user in, send the JWT again
     createSendToken(user, 201, res);
 });
@@ -190,6 +187,9 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
 exports.updatePassword = catchAsync(async (req, res, next) => {
     // 1) We need to get user
+    if(!req.body.passwordCurrent || !req.body.password || !req.body.passwordConfirm){
+        return next(new AppError('All fields are mandatory', 400));
+    }
     const user = await User.findById(req.user.id).select('+password');
 
     // 2) Check if posted password is correct
@@ -200,7 +200,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
     user.password = req.body.password;
     user.passwordConfirm = req.body.passwordConfirm;
     await user.save();
-    // findByIdandUpdate not used because validat will not work and save hooks defined in model as well.
+    // findByIdandUpdate not used because validate will not work and save hooks defined in model as well.
 
     // 4) Log user in, send JWT token
     createSendToken(user, 200, res);

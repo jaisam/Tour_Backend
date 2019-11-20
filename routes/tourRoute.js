@@ -27,6 +27,8 @@ router.post('/',
     tourController.createTour);
 router.patch('/:id',
     // authController.protect,
+    tourController.uploadTourImages,
+    tourController.resizeTourImages,
     tourController.updateTour);
 router.delete('/:id',
     // authController.protect,

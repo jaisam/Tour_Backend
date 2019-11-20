@@ -63,3 +63,7 @@ Modified date comparision in findOne of resetPassword API.
 
 Commit #7 : 
 1) Used SendGrid to send mail in production environment.
+
+Commit #8 :
+1) Added multer to store userModel's photo and tourModel's imageCover/images.
+2) Added welcome.pug,passwordReset.pug templates for welcomeMail(),forgotPasswordMail() functions of utils/emails 

@@ -26,6 +26,8 @@ router.get('/me',
     userController.getUser);
 router.patch('/updateMe',
     // authController.protect,
+    userController.uploadUserPhoto,
+    userController.resizeUserPhoto,
     userController.updateMe);
 router.delete('/deleteMe',
     // authController.protect,
@@ -47,7 +49,6 @@ router.post('/',
     userController.createUser);
 router.get('/:id',
     // authController.protect,
-    // authController.restrict('admin'),
     userController.getUser);
 router.patch('/:id',
     // authController.protect,

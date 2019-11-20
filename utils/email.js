@@ -1,8 +1,11 @@
 const nodemailer = require('nodemailer');
+const pug = require('pug');
+const htmlToText = require('html-to-text');
+
 
 class Email {
     constructor(user, url) {
-        this.userName = user.name,
+        this.firstName = user.name.split(' ')[0],
             this.to = user.email,
             this.from = process.env.EMAIL_FROM,
             this.url = url
@@ -31,8 +34,16 @@ class Email {
         });
     }
 
-    async send(subject, message) {
-        // 1) Create a transporter
+    async send(subject, template) {
+        // 1) Render HTML from pug template and Create a transporter
+        // Below line will convert pug file content into HTML, in mailOptions HTML need to be sent, not pug template
+        const html = pug.renderFile(
+            `${__dirname}/../views/emails/${template}.pug`, // location of pug file
+            { // Object which has list of variables which we need to dynamically update in pug template
+                firstName : this.firstName,
+                url : this.url,
+                subject
+            });
         let transporter = this.myTransport();
 
         // 2) Mail Options
@@ -40,8 +51,9 @@ class Email {
             from: this.from,
             to: this.to,
             subject,
-            text: message
-            //html :
+            html,
+            text: htmlToText.fromString(html) // convert HTML file into text only. it will just have innerHTML contents and remove <p>,<a>,etc
+
         };
 
         // 3) send Email
@@ -52,38 +64,26 @@ class Email {
 
     async forgotPasswordMail() {
         await this.send(
-            'Reset Password',
-            `Hi ${this.userName},\n 
-            Forgot Password? No Problem!
-            \n
-            Reset your password by submitting new password at below link : \n
-            ${this.url} \n
-            Please ignore this email, if you did not request a password reset.
-            \n
-            Thanks and Regards,
-            Tours team.`
+            'Reset Password Mail(Valid only for 10 mins)',
+            'passwordReset'
         );
     }
 
-    async resetPasswordMail() {
-        await this.send(
-            'Password Resetted Successfully',
-            `Hi ${this.userName},\n 
-            Your password is resetted successfully. PLease login again to check interesting tours!
-            \n
-            Thanks and Regards,
-            Tours team.`
-        );
-    }
+    // async resetPasswordMail() {
+    //     await this.send(
+    //         'Password Resetted Successfully',
+    //         `Hi ${this.firstName},\n 
+    //         Your password is resetted successfully. PLease login again to check interesting tours!
+    //         \n
+    //         Thanks and Regards,
+    //         Tours team.`
+    //     );
+    // }
 
     async welcomeMail() {
         await this.send(
             'Welcome to Tours website!',
-            `Hi ${this.userName},\n 
-            We're glad you're here! Check out our interesting Tours. We can't wait to see you enjoy our tours.\n
-            \n
-            Thanks and Regards,
-            Tours team.`
+            'welcome'
         );
     }
 
