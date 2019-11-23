@@ -67,3 +67,7 @@ Commit #7 :
 Commit #8 :
 1) Added multer to store userModel's photo and tourModel's imageCover/images.
 2) Added welcome.pug,passwordReset.pug templates for welcomeMail(),forgotPasswordMail() functions of utils/emails 
+
+Commit #9:
+1) Corrected Statuscode in protect route in call of new AppError().
+2) Installed bcryptjs instead of bcrypt as bcrypt is causing issues in AWS. bcryptjs is compiled version of bcrypt.

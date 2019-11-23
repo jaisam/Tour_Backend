@@ -43,6 +43,11 @@ const createSendToken = (user, statusCode, res) => {
 
 exports.signup = catchAsync(async (req, res, next) => {
     // const newUser = await User.create(req.body);
+    const { name, email, password, passwordConfirm } = req.body;
+    if (!name || !email || !password || !passwordConfirm) {
+        return next(new AppError("Please provide mandatory fields!", 400));
+    }
+
     const newUser = new User({
         name: req.body.name,
         email: req.body.email,
@@ -50,7 +55,7 @@ exports.signup = catchAsync(async (req, res, next) => {
         passwordConfirm: req.body.passwordConfirm
     });
     const savedData = await newUser.save();
-    const url = `${req.protocol}://${req.get('Host')}/user/me`;
+    const url = `${req.protocol}://${req.get('Host')}/api/user/me`;
     await new Email(newUser, url).welcomeMail();
     createSendToken(newUser, 201, res);
 });
@@ -61,7 +66,6 @@ exports.login = catchAsync(async (req, res, next) => {
 
     // Check if email and password exists
     if (!email || !password) {
-        var err;
         /* Using my own AppError class which extends inbuilt Error Class */
         return next(new AppError('Please provide Email and Password', 400));
     }
@@ -86,19 +90,19 @@ exports.protect = catchAsync(async (req, res, next) => {
 
     // 2) Verification of token
     if (!token) {
-        return next(new AppError('You are not logged in! Please log in to access!'), 401);
+        return next(new AppError('You are not logged in! Please log in to access!', 401));
     }
 
     // 3) Check if user exists for this token, if not that means user's account is deleted so dont grant access
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
     const freshUser = await User.findById(decoded.id);
     if (!freshUser) {
-        return next(new AppError('User with this token does not exist'), 401);
+        return next(new AppError('User with this token does not exist', 401));
     }
 
     // 4) Check if user changed password after token was issued, if true throw error.
     if (freshUser.changedPasswordAfter(decoded.iat)) {
-        return next(new AppError('User recently changed password.Please login again'), 401);
+        return next(new AppError('User recently changed password.Please login again', 401));
     }
 
     // GRANT ACCESS TO PROTECTED ROUTE
@@ -144,7 +148,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
         user.passwordResetExpires = undefined;
         await user.save({ validateBeforeSave: false });
 
-        return next(new AppError('There was an error sending email. Try again later!'), 500);
+        return next(new AppError('There was an error sending email. Try again later!', 500));
     }
 });
 
@@ -187,14 +191,14 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
 exports.updatePassword = catchAsync(async (req, res, next) => {
     // 1) We need to get user
-    if(!req.body.passwordCurrent || !req.body.password || !req.body.passwordConfirm){
+    if (!req.body.passwordCurrent || !req.body.password || !req.body.passwordConfirm) {
         return next(new AppError('All fields are mandatory', 400));
     }
     const user = await User.findById(req.user.id).select('+password');
 
     // 2) Check if posted password is correct
     if (!await user.correctPassword(req.body.passwordCurrent, user.password))
-        return next(new AppError('Your current password is wrong'), 401);
+        return next(new AppError('Your current password is wrong', 401));
 
     // 3) If so, update password
     user.password = req.body.password;

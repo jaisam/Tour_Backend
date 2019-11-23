@@ -1,5 +1,5 @@
 const AppError = require('../utils/appError');
-const _=require('lodash');
+// const _=require('lodash');
 
 const sendDevError = (error, req, res, next) => {
     // console.log('Inside sendDevError' , error);
@@ -69,7 +69,6 @@ const handleJWTExpiredError = () => {
 module.exports = (error, req, res, next) => {
 
     // console.log('Inside Global Error Handler' , error);
-
     error.statusCode = error.statusCode || 500;
     error.status = error.status || 'error';
 
