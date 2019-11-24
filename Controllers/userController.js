@@ -55,13 +55,11 @@ exports.uploadUserPhoto = upload.single('photo');
 exports.resizeUserPhoto = async (req, res, next) => {
     if (!req.file) return next();
     req.file.filename = `users/user-${req.user.id}-${Date.now()}.jpeg`;
-    console.log('file', req.file);
-    console.log('filename', req.file.filename);
+
     await sharp(req.file.buffer)
         .resize(500, 500)
         .toFormat('jpeg')
         .jpeg({ quality: 90 })
-    // .toFile(`public/img/users/${req.file.filename}`);
 
     next();
 };
@@ -78,7 +76,7 @@ exports.uploadImagetoS3Bucket = (req, res, next) => {
 
     var params = {
         Bucket: process.env.AWS_BUCKET_NAME,
-        Key: file.filename,//`users/user-${req.user.id}-${Date.now()}.jpeg`,
+        Key: file.filename,
         Body: file.buffer,
         ContentType: file.mimetype,
         ACL: "public-read"

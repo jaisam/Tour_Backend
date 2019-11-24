@@ -2,7 +2,6 @@ const AppError = require('../utils/appError');
 // const _=require('lodash');
 
 const sendDevError = (error, req, res, next) => {
-    // console.log('Inside sendDevError' , error);
     res.status(error.statusCode).json({
         status: error.status,
         message: error.message,
@@ -13,7 +12,6 @@ const sendDevError = (error, req, res, next) => {
 
 const sendProdError = (err, req, res, next) => {
   // Operational, trusted error: send message to client
-  // console.log('Inside sendProdError' , err);
   if (err.isOperational) {
     console.log("opp error");
     res.status(err.statusCode).json({
@@ -67,7 +65,6 @@ const handleJWTExpiredError = () => {
 
 
 module.exports = (error, req, res, next) => {
-
     // console.log('Inside Global Error Handler' , error);
     error.statusCode = error.statusCode || 500;
     error.status = error.status || 'error';

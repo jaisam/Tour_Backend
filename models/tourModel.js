@@ -7,7 +7,6 @@ const TourSchema = mongoose.Schema({
         required: [true, 'A tour must have name'],
         trim: true,
         unique: true,
-        // Checks length is between minlength and maxlength.
         maxlength: [100, 'A tour can have name between 1-100 characters'],
         minlength: [1, 'A tour can have name between 1-100 characters']
     },

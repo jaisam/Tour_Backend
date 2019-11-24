@@ -33,14 +33,6 @@ const ReviewSchema = mongoose.Schema({
 
 
 ReviewSchema.pre(/^find/, function (next) {
-    // Populating Tour name is not required as getllTours fetches review data. IF reviews are fetched alone then we can populate tour name in reviews
-    // this.populate({
-    //     path : 'tour',
-    //     select : 'name'
-    // }).populate({
-    //     path : 'user',
-    //     select : 'name photo'
-    // });
     this.populate({
         path: 'user',
         select: 'name photo'

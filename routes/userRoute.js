@@ -18,20 +18,19 @@ router.use(authController.protect);
 
 
 router.patch('/updateMyPassword',
-    // authController.protect,
     authController.updatePassword);
+
 router.get('/me',
-    // authController.protect,
     userController.getMe,
     userController.getUser);
+
 router.patch('/updateMe',
-    // authController.protect,
     userController.uploadUserPhoto,
     userController.resizeUserPhoto,
     userController.uploadImagetoS3Bucket,
     userController.updateMe);
+
 router.delete('/deleteMe',
-    // authController.protect,
     userController.deleteMe);
 
 
@@ -41,23 +40,18 @@ router.use(authController.restrictTo('admin'));
 
 
 router.get('/',
-    // authController.protect,
-    // authController.restrict('admin'),
     userController.getAllUsers);
+
 router.post('/',
-    // authController.protect,
-    // authController.restrict('admin'),
     userController.createUser);
+
 router.get('/:id',
-    // authController.protect,
     userController.getUser);
+
 router.patch('/:id',
-    // authController.protect,
-    // authController.restrict('admin'),
     userController.updateUser);
+
 router.delete('/:id',
-    // authController.protect,
-    // authController.restrict('admin'),
     userController.deleteUser);
 
 

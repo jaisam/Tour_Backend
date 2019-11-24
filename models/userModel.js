@@ -20,8 +20,8 @@ const UserSchema = mongoose.Schema({
         }
     },
     photo: {
-        type : String,
-        default : 'default.jpg'
+        type: String,
+        default: 'default.jpg'
     },
     role: {
         type: String,
@@ -73,7 +73,6 @@ UserSchema.pre('save', async function (next) {
 
 UserSchema.pre('save', function (next) {
     if (!this.isModified('password') || this.isNew) return next();
-
     this.passwordChangedAt = Date.now() - 1000;
     next();
 });
@@ -91,7 +90,6 @@ UserSchema.methods.correctPassword = async function (candidate, userPassword) {
 }
 
 UserSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
-
     // Password changed after token was assigned
     if (this.passwordChangedAt) {
         const changedTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
@@ -104,11 +102,9 @@ UserSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
 
 UserSchema.methods.createPasswordResetToken = function () {
     const resetToken = crypto.randomBytes(32).toString('hex');
-
     this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-
     this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
-
     return resetToken;
 }
+
 module.exports = mongoose.model('User', UserSchema);

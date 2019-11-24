@@ -3,8 +3,11 @@ const catchAsync = require('../utils/catchAsync');
 
 
 const calcAverageRatingOfTour = catchAsync(async (req, res, next) => {
-    const reviews = Review.find({ tour: req.body.tour });
-    const ratingsAverage = reviews.reduce((a, b) => a + b, 0) / reviews.length || 4.5;
+    const reviews = Review.find({
+        tour: req.body.tour
+    });
+    const ratingsAverage = reviews.reduce((a, b) =>
+        a + b, 0) / reviews.length || 4.5;
     const ratingsQuantity = reviews.length || 0;
     await Tour.findByIdAndUpdate(req.body.tour, {
         ratingsAverage,
@@ -12,13 +15,12 @@ const calcAverageRatingOfTour = catchAsync(async (req, res, next) => {
     });
 });
 
+
 exports.getOne = function (Model) {
     return catchAsync(async (req, res, next) => {
         const doc = await Model.findById(req.params.id)
         // Since we have made this code generalize, populate is used in respective models
         if (!doc) {
-            // console.log('Inside NO tour find');
-            /* Using my own AppError class which extends inbuilt Error Class */
             next(new AppError('No document found', 404));
         }
         else {
@@ -39,8 +41,6 @@ exports.createOne = function (Model) {
         if (Model === 'Review') {
             console.log('True');
         }
-        // const newTour = new Tour(req.body);
-        // const savedData = await newTour.save();
         const doc = await Model.create(req.body);
         res.status(201).json({
             status: 'success',
@@ -52,7 +52,6 @@ exports.createOne = function (Model) {
 };
 
 
-
 exports.updateOne = function (Model) {
     return catchAsync(async (req, res, next) => {
         const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
@@ -60,7 +59,6 @@ exports.updateOne = function (Model) {
             runValidators: true // DUe to this flag validation will take place while updating document
         });
         if (!doc) {
-            /* Using my own AppError class which extends inbuilt Error Class */
             next(new AppError(`Cannot update document as it does not exist`, 404));
         }
         else {
@@ -75,12 +73,10 @@ exports.updateOne = function (Model) {
 };
 
 
-
 exports.deleteOne = function (Model) {
     return catchAsync(async (req, res, next) => {
         const doc = await Model.findByIdAndDelete(req.params.id);
         if (!doc) {
-            /* Using my own AppError class which extends inbuilt Error Class */
             next(new AppError(`Cannot delete document,as it does not exist`, 404));
         } else {
             res.status(204).json({

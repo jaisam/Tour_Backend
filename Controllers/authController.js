@@ -42,7 +42,6 @@ const createSendToken = (user, statusCode, res) => {
 }
 
 exports.signup = catchAsync(async (req, res, next) => {
-    // const newUser = await User.create(req.body);
     const { name, email, password, passwordConfirm } = req.body;
     if (!name || !email || !password || !passwordConfirm) {
         return next(new AppError("Please provide mandatory fields!", 400));
@@ -66,14 +65,12 @@ exports.login = catchAsync(async (req, res, next) => {
 
     // Check if email and password exists
     if (!email || !password) {
-        /* Using my own AppError class which extends inbuilt Error Class */
         return next(new AppError('Please provide Email and Password', 400));
     }
 
     // Check if user exists and password is correct
     const user = await User.findOne({ email }).select('+password');
     if (!user || !(await user.correctPassword(password, user.password))) {
-        /* Using my own AppError class which extends inbuilt Error Class */
         return next(new AppError('Incorrect Email or Password', 401));
     }
 
@@ -131,10 +128,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     // 2) Generate random Reset Token
     const resetToken = user.createPasswordResetToken();
     const savedUser = await user.save({ validateBeforeSave: false }); //THis is done because in schema we have required fields but we are not saving whole data
-    console.log('savedUserUser', savedUser);
-
     // 3) Send it to user via email
-
     try {
         const resetURL = `${req.protocol}://${req.get('host')}/api/user/resetPassword/${resetToken}`;
         await new Email(user, resetURL).forgotPasswordMail();
@@ -147,7 +141,6 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
         user.passwordResetToken = undefined;
         user.passwordResetExpires = undefined;
         await user.save({ validateBeforeSave: false });
-
         return next(new AppError('There was an error sending email. Try again later!', 500));
     }
 });
@@ -156,8 +149,6 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 exports.resetPassword = catchAsync(async (req, res, next) => {
     // 1) Get User based on token
     const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
-    // console.log('hashedToken : ', hashedToken);
-    // console.log('Current Date', new Date().toISOString());
 
     // 2) If token has expired, and there is user, ask him to use forgot password again
     const user = await User.findOne(
@@ -174,9 +165,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     user.passwordConfirm = req.body.passwordConfirm;
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
-
     const newUser = await user.save();
-    // console.log('New User :', newUser);
 
     // 3) Update changedPasswordAt property for user
     // This is done in userModel

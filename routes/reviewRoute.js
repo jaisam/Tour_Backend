@@ -19,18 +19,15 @@ router.get('/:id', reviewController.getReview);
 router.use(authController.protect);
 
 router.post('/',
-    // authController.protect,
     authController.restrictTo('user'),
     reviewController.assignTourUserIds,
     reviewController.createReview);
 
 router.patch('/:id',
-    // authController.protect,
     authController.restrictTo('user','admin'),
     reviewController.updateReview);
 
 router.delete('/:id',
-    // authController.protect,
     authController.restrictTo('user','admin'),
     reviewController.deleteReview);
 

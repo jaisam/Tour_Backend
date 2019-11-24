@@ -23,15 +23,14 @@ router.use(authController.protect, authController.restrictTo('admin', 'lead-guid
 
 
 router.post('/',
-    // authController.protect,
     tourController.createTour);
+
 router.patch('/:id',
-    // authController.protect,
     tourController.uploadTourImages,
     tourController.resizeTourImages,
     tourController.updateTour);
+
 router.delete('/:id',
-    // authController.protect,
     tourController.deleteTour);
 
 
