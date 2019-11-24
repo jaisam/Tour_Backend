@@ -39,11 +39,11 @@ ReviewSchema.pre(/^find/, function (next) {
     //     select : 'name'
     // }).populate({
     //     path : 'user',
-    //     select : 'name image'
+    //     select : 'name photo'
     // });
     this.populate({
         path: 'user',
-        select: 'name image'
+        select: 'name photo'
     });
     next();
 });

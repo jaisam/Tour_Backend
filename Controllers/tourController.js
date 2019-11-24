@@ -36,63 +36,65 @@ exports.resizeTourImages = async (req, res, next) => {
     // console.log(req.files);
 
     // 1) imageCover
-    req.files.imageCover[0].filename = `tour-${req.params.id}-${Date.now()}-cover.jpeg`;
+    req.files.imageCover[0].filename = `tour/tour-${req.params.id}-${Date.now()}-cover.jpeg`;
     await sharp(req.files.imageCover[0].buffer)
         .resize(2000, 1300)
         .toFormat('jpeg')
         .jpeg({ quality: 90 })
     // .toFile(`public/img/tours/${filename}`);
     // req.body.imageCover = filename;
-    console.log(req.files.imageCover[0]);
-    await uploadImagetoS3Bucket(req.files.imageCover[0]);
-    req.body.imageCover = req.files.imageCover[0].filename;
-    console.log('ImageCover', req.body.imageCover);
+    // console.log(req.files.imageCover[0]);
+    const data = await uploadImagetoS3Bucket(req.files.imageCover[0]);
+    req.body.imageCover = data.Location;
 
-    // // 2) images
-    // req.body.images = [];
+    // 2) images
+    req.body.images = [];
 
-    // await Promise.all(
-    //     req.files.images.map(async (file, i) => {
-    //         let filename = `tour-${req.params.id}-${Date.now()}-image-${i + 1}.jpeg`;
-    //         await sharp(file.buffer)
-    //             .resize(2000, 1300)
-    //             .toFormat('jpeg')
-    //             .jpeg({ quality: 90 })
-    //         // .toFile(`public/img/tours/${filename}`);
+    await Promise.all(
+        req.files.images.map(async (file, i) => {
+            // console.log(file);
+            let filename = `tours/tour-${req.params.id}-${Date.now()}-image-${i + 1}.jpeg`;
+            await sharp(file.buffer)
+                .resize(2000, 1300)
+                .toFormat('jpeg')
+                .jpeg({ quality: 90 })
+            // .toFile(`public/img/tours/${filename}`);
 
-    //         req.body.images.push(filename);
-    //     })
-    // );
+            file.filename = filename;
+            // console.log(file.filename);
+            const data = await uploadImagetoS3Bucket(file);
+            // console.log(data.Location);
+            file.filename = data.Location;
+            req.body.images.push(file.filename);
+        })
+    );
+    // console.log(req.body.images);
 
-    // next();
+    next();
 };
 
 
 const uploadImagetoS3Bucket = (file) => {
-    // const files = req.files;
-    let s3Bucket = new AWS.S3({
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-        region: process.env.AWS_REGION
-    });
+    try {
+        // const files = req.files;
+        let s3Bucket = new AWS.S3({
+            accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+            region: process.env.AWS_REGION
+        });
 
-    var params = {
-        Bucket: process.env.AWS_BUCKET_NAME,
-        Key: file.filename,//`users/user-${req.user.id}-${Date.now()}.jpeg`,
-        Body: file.buffer,
-        ContentType: file.mimetype,
-        ACL: "public-read"
-    };
+        var params = {
+            Bucket: process.env.AWS_BUCKET_NAME,
+            Key: file.filename,//`users/user-${req.user.id}-${Date.now()}.jpeg`,
+            Body: file.buffer,
+            ContentType: file.mimetype,
+            ACL: "public-read"
+        };
 
-    s3Bucket.upload(params, (err, data) => {
-        if (err) {
-            console.log(err);
-            return next(new AppError(err.message, 500));
-        }
-        // Setting URL of location where image is stored on s3 bucket  
-        file.filename = data.Location;
-        console.log('Loaction ', file.filename);
-    });
+        return s3Bucket.upload(params).promise()
+    } catch (err) {
+        console.log(err);
+    }
 };
 
 

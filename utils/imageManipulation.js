@@ -7,26 +7,30 @@
 //         this.res = res;
 //     }
 
-//     // This informs that storage option is buffer
-//     storage = multer.memoryStorage();
+//     // // This informs that storage option is buffer
+//     // storage = multer.memoryStorage();
 
-//     // This will check if uploaded file is image or not 
-//     fileFilter = (req, file, cb) => {
-//         if (file.mimetype.startsWith('image'))
-//             cb(null, true);
-//         else
-//             cb(new AppError('Please upload a image', 400), false);
-//     };
+//         // This will check if uploaded file is image or not 
+//         fileFilter(req, file, cb) {
+//             if (file.mimetype.startsWith('image'))
+//                 cb(null, true);
+//             else
+//                 cb(new AppError('Please upload a image', 400), false);
+//         };
 
 //     uploadSinglePhoto() {
+//         // This informs that storage option is buffer
+//         const storage = multer.memoryStorage();
 
 //         // Stores file into specified storage with specified filename
 //         const upload = multer(
 //             {
 //                 storage,
-//                 fileFilter
+//                 fileFIlter : this.fileFilter
 //             });
 //         upload.single('photo');
+//         console.log(this.req.file);
+//         return this
 //     }
 
 //     async resizeUserPhoto() {
@@ -37,11 +41,11 @@
 //             .toFormat('jpeg')
 //             .jpeg({ quality: 90 })
 //         // .toFile(`public/img/users/${req.file.filename}`);
-
-//         this.uploadImagetoS3Bucket(this.req.file);
+//         return this;
+//         // this.uploadImagetoS3Bucket(this.req.file);
 //     }
 
-//     uploadImagetoS3Bucket = (file) => {
+//     uploadImagetoS3Bucket(file) {
 //         // const file = req.file;
 //         let s3Bucket = new AWS.S3({
 //             accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -68,3 +72,5 @@
 
 //     }
 // }
+
+// module.exports = ImageManipulation;

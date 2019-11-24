@@ -48,7 +48,6 @@ const upload = multer(
         fileFilter
     });
 
-
 // 'photo' property holds uploaded file. single() will add that file into req.file 
 exports.uploadUserPhoto = upload.single('photo');
 
@@ -56,7 +55,8 @@ exports.uploadUserPhoto = upload.single('photo');
 exports.resizeUserPhoto = async (req, res, next) => {
     if (!req.file) return next();
     req.file.filename = `users/user-${req.user.id}-${Date.now()}.jpeg`;
-
+    console.log('file', req.file);
+    console.log('filename', req.file.filename);
     await sharp(req.file.buffer)
         .resize(500, 500)
         .toFormat('jpeg')
@@ -67,7 +67,9 @@ exports.resizeUserPhoto = async (req, res, next) => {
 };
 
 exports.uploadImagetoS3Bucket = (req, res, next) => {
+    if (!req.file) return next();
     const file = req.file;
+    console.log('file', file);
     let s3Bucket = new AWS.S3({
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
