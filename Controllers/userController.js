@@ -4,6 +4,7 @@ const factory = require('../Controllers/handlerFactory');
 const catchAsync = require('../utils/catchAsync');
 const multer = require('multer');
 const sharp = require('sharp');
+const AWS = require('aws-sdk');
 
 
 const filterObj = (obj, ...allowedFields) => {
@@ -34,10 +35,10 @@ const storage = multer.memoryStorage();
 
 // This will check if uploaded file is image or not 
 const fileFilter = (req, file, cb) => {
-    if(file.mimetype.startsWith('image'))
-    cb(null, true);
- else 
-    cb(new AppError('Please upload a image', 400), false);
+    if (file.mimetype.startsWith('image'))
+        cb(null, true);
+    else
+        cb(new AppError('Please upload a image', 400), false);
 };
 
 // Stores file into specified storage with specified filename
@@ -52,17 +53,45 @@ const upload = multer(
 exports.uploadUserPhoto = upload.single('photo');
 
 // Resize the uploaded image
-exports.resizeUserPhoto = async(req,res,next) => {
-    if(!req.file) return next();
-    req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
+exports.resizeUserPhoto = async (req, res, next) => {
+    if (!req.file) return next();
+    req.file.filename = `users/user-${req.user.id}-${Date.now()}.jpeg`;
 
     await sharp(req.file.buffer)
-      .resize(500, 500)
-      .toFormat('jpeg')
-      .jpeg({ quality: 90 })
-      .toFile(`public/img/users/${req.file.filename}`);
+        .resize(500, 500)
+        .toFormat('jpeg')
+        .jpeg({ quality: 90 })
+    // .toFile(`public/img/users/${req.file.filename}`);
 
     next();
+};
+
+exports.uploadImagetoS3Bucket = (req, res, next) => {
+    const file = req.file;
+    let s3Bucket = new AWS.S3({
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        region: process.env.AWS_REGION
+    });
+
+    var params = {
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Key: file.filename,//`users/user-${req.user.id}-${Date.now()}.jpeg`,
+        Body: file.buffer,
+        ContentType: file.mimetype,
+        ACL: "public-read"
+    };
+
+    s3Bucket.upload(params, (err, data) => {
+        if (err) {
+            console.log(err);
+            return next(new AppError(err.message, 500));
+        }
+        // Setting URL of location where image is stored on s3 bucket  
+        file.filename = data.Location;
+        next();
+    });
+
 }
 
 exports.getMe = (req, res, next) => {
@@ -72,17 +101,17 @@ exports.getMe = (req, res, next) => {
 
 
 // This will not update pasword, for that purpose updatePassword and reserPassword routes should be used.
-exports.updateMe = catchAsync(async (req, res, next) => {
-    // console.log(req.file);
-    // console.log(req.body);
-    // 1) If Password change then throw error
+exports.updateMe = async (req, res, next) => {
+
+    // 1) If Password data then throw error
     if (req.body.password || req.body.passwordConfirm) {
         return next(new AppError(`This route is not for Password updates. Please use 
     /updateMyPassword `, 400));
     }
+
     // 2) Update user document
     const filteredBody = filterObj(req.body, 'name', 'email');
-    if(req.file) filteredBody.photo = req.file.filename;
+    if (req.file) filteredBody.photo = req.file.filename;
     const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
         new: true,
         runValidators: true
@@ -94,7 +123,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
             user: updatedUser
         }
     });
-});
+};
 
 // If user wants to delete this account, its active status will be set to false.
 // Only admin can delete accounts.

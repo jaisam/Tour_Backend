@@ -71,3 +71,6 @@ Commit #8 :
 Commit #9:
 1) Corrected Statuscode in protect route in call of new AppError().
 2) Installed bcryptjs instead of bcrypt as bcrypt is causing issues in AWS. bcryptjs is compiled version of bcrypt.
+
+Commit #10:
+1) Storing images to AWS s3 bucket.

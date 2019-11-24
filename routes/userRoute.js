@@ -28,6 +28,7 @@ router.patch('/updateMe',
     // authController.protect,
     userController.uploadUserPhoto,
     userController.resizeUserPhoto,
+    userController.uploadImagetoS3Bucket,
     userController.updateMe);
 router.delete('/deleteMe',
     // authController.protect,
