@@ -74,3 +74,7 @@ Commit #9:
 
 Commit #10:
 1) Storing images to AWS s3 bucket.
+
+Commit #10:
+1) Added pm2. It is production package manager which has inbuilt load balancer.
+It allows to keep application alive forever, reloads app when crahsed and common system admin tasks like logging,stopping app and restarting.
